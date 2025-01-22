@@ -3,8 +3,12 @@ using FFMpegCore.Builders.MetaData;
 
 namespace FFMpegCore
 {
-    internal class MediaAnalysis : IMediaAnalysis
+    public class MediaAnalysis : IMediaAnalysis
     {
+        public MediaAnalysis()
+        {
+        }
+
         internal MediaAnalysis(FFProbeAnalysis analysis)
         {
             Format = ParseFormat(analysis.Format);
@@ -49,18 +53,18 @@ namespace FFMpegCore
             PrimaryAudioStream?.Duration ?? TimeSpan.Zero
         }.Max();
 
-        public MediaFormat Format { get; }
+        public MediaFormat Format { get; set; }
 
-        public List<ChapterData> Chapters { get; }
+        public List<ChapterData> Chapters { get; set; }
 
         public AudioStream? PrimaryAudioStream => AudioStreams.OrderBy(stream => stream.Index).FirstOrDefault();
         public VideoStream? PrimaryVideoStream => VideoStreams.OrderBy(stream => stream.Index).FirstOrDefault();
         public SubtitleStream? PrimarySubtitleStream => SubtitleStreams.OrderBy(stream => stream.Index).FirstOrDefault();
 
-        public List<VideoStream> VideoStreams { get; }
-        public List<AudioStream> AudioStreams { get; }
-        public List<SubtitleStream> SubtitleStreams { get; }
-        public IReadOnlyList<string> ErrorData { get; }
+        public List<VideoStream> VideoStreams { get; set; }
+        public List<AudioStream> AudioStreams { get; set; }
+        public List<SubtitleStream> SubtitleStreams { get; set; }
+        public IReadOnlyList<string> ErrorData { get; set; }
 
         private int? GetBitDepth(FFProbeStream stream)
         {

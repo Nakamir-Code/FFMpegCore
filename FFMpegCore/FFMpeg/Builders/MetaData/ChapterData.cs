@@ -2,9 +2,9 @@
 {
     public class ChapterData
     {
-        public string Title { get; private set; }
-        public TimeSpan Start { get; private set; }
-        public TimeSpan End { get; private set; }
+        public string Title { get; set; }
+        public TimeSpan Start { get; set; }
+        public TimeSpan End { get; set; }
 
         public TimeSpan Duration => End - Start;
 

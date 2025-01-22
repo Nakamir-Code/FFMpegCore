@@ -1,9 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Nullable>disable</Nullable>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>A .NET Standard FFMpeg/FFProbe wrapper for easily integrating media analysis and conversion into your .NET applications</Description>
-    <PackageVersion>5.1.1</PackageVersion>
+    <PackageVersion>5.1.1-nakamir.2</PackageVersion>
     <PackageOutputPath>../nupkg</PackageOutputPath>
     <PackageReleaseNotes>
     </PackageReleaseNotes>

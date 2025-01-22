@@ -10,7 +10,7 @@ namespace FFMpegCore
 {
     public static class FFProbe
     {
-        public static IMediaAnalysis Analyse(string filePath, FFOptions? ffOptions = null, string? customArguments = null)
+        public static MediaAnalysis Analyse(string filePath, FFOptions? ffOptions = null, string? customArguments = null)
         {
             ThrowIfInputFileDoesNotExist(filePath);
 
@@ -43,7 +43,7 @@ namespace FFMpegCore
             return ParsePacketsOutput(result);
         }
 
-        public static IMediaAnalysis Analyse(Uri uri, FFOptions? ffOptions = null, string? customArguments = null)
+        public static MediaAnalysis Analyse(Uri uri, FFOptions? ffOptions = null, string? customArguments = null)
         {
             var instance = PrepareStreamAnalysisInstance(uri.AbsoluteUri, ffOptions ?? GlobalFFOptions.Current, customArguments);
             var result = instance.StartAndWaitForExit();
@@ -51,7 +51,7 @@ namespace FFMpegCore
 
             return ParseOutput(result);
         }
-        public static IMediaAnalysis Analyse(Stream stream, FFOptions? ffOptions = null, string? customArguments = null)
+        public static MediaAnalysis Analyse(Stream stream, FFOptions? ffOptions = null, string? customArguments = null)
         {
             var streamPipeSource = new StreamPipeSource(stream);
             var pipeArgument = new InputPipeArgument(streamPipeSource);
@@ -75,7 +75,7 @@ namespace FFMpegCore
             return ParseOutput(result);
         }
 
-        public static async Task<IMediaAnalysis> AnalyseAsync(string filePath, FFOptions? ffOptions = null, CancellationToken cancellationToken = default, string? customArguments = null)
+        public static async Task<MediaAnalysis> AnalyseAsync(string filePath, FFOptions? ffOptions = null, CancellationToken cancellationToken = default, string? customArguments = null)
         {
             ThrowIfInputFileDoesNotExist(filePath);
 
@@ -113,7 +113,7 @@ namespace FFMpegCore
             return ParsePacketsOutput(result);
         }
 
-        public static async Task<IMediaAnalysis> AnalyseAsync(Uri uri, FFOptions? ffOptions = null, CancellationToken cancellationToken = default, string? customArguments = null)
+        public static async Task<MediaAnalysis> AnalyseAsync(Uri uri, FFOptions? ffOptions = null, CancellationToken cancellationToken = default, string? customArguments = null)
         {
             var instance = PrepareStreamAnalysisInstance(uri.AbsoluteUri, ffOptions ?? GlobalFFOptions.Current, customArguments);
             var result = await instance.StartAndWaitForExitAsync(cancellationToken).ConfigureAwait(false);
@@ -121,7 +121,7 @@ namespace FFMpegCore
 
             return ParseOutput(result);
         }
-        public static async Task<IMediaAnalysis> AnalyseAsync(Stream stream, FFOptions? ffOptions = null, CancellationToken cancellationToken = default, string? customArguments = null)
+        public static async Task<MediaAnalysis> AnalyseAsync(Stream stream, FFOptions? ffOptions = null, CancellationToken cancellationToken = default, string? customArguments = null)
         {
             var streamPipeSource = new StreamPipeSource(stream);
             var pipeArgument = new InputPipeArgument(streamPipeSource);
@@ -155,7 +155,7 @@ namespace FFMpegCore
             return ParseFramesOutput(result);
         }
 
-        private static IMediaAnalysis ParseOutput(IProcessResult instance)
+        private static MediaAnalysis ParseOutput(IProcessResult instance)
         {
             var json = string.Join(string.Empty, instance.OutputData);
             var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeAnalysis>(json, new JsonSerializerOptions

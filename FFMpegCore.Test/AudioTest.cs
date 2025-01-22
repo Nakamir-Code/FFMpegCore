@@ -42,6 +42,7 @@ namespace FFMpegCore.Test
                 .FromPipeInput(new StreamPipeSource(file), options => options.ForceFormat("s16le"))
                 .OutputToPipe(new StreamPipeSink(memoryStream), options => options.ForceFormat("mp3"))
                 .ProcessAsynchronously();
+            Assert.IsTrue(memoryStream.Length > 0);
         }
 
         [TestMethod]
