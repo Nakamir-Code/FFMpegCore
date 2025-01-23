@@ -8,7 +8,7 @@ namespace FFMpegCore
     {
         private readonly FFMpegGlobalArguments _globalArguments = new();
 
-        private FFMpegArguments() { }
+        public FFMpegArguments() { }
 
         public string Text => GetText();
 
