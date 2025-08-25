@@ -6,7 +6,7 @@
     <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>A .NET Standard FFMpeg/FFProbe wrapper for easily integrating media analysis and conversion into your .NET applications</Description>
-    <PackageVersion>5.2.0-nakamir.0</PackageVersion>
+    <PackageVersion>5.2.0-nakamir.1</PackageVersion>
     <PackageOutputPath>../nupkg</PackageOutputPath>
     <PackageReleaseNotes>- **Instances and Packages Updates**: Updates to various instances and packages by rosenbjerg.
 - **Audio and Video Enhancements**: Additions include a Copy option to Audio Codec and a Crop option to Arguments by brett-baker; video-stream level added to FFProbe analysis by Kaaybi; AV1 support for smaller snapshots and videos by BenediktBertsch; multiple input files support by AddyMills; HDR color properties support added to FFProbe analysis by Tomiscout.

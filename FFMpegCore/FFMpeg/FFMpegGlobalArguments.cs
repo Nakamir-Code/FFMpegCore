@@ -8,7 +8,7 @@ namespace FFMpegCore
 
         public FFMpegGlobalArguments WithVerbosityLevel(VerbosityLevel verbosityLevel = VerbosityLevel.Error) => WithOption(new VerbosityLevelArgument(verbosityLevel));
 
-        private FFMpegGlobalArguments WithOption(IArgument argument)
+        public FFMpegGlobalArguments WithOption(IArgument argument)
         {
             Arguments.Add(argument);
             return this;
