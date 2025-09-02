@@ -9,7 +9,7 @@ namespace FFMpegCore
         {
         }
 
-        internal MediaAnalysis(FFProbeAnalysis analysis)
+        public MediaAnalysis(FFProbeAnalysis analysis)
         {
             Format = ParseFormat(analysis.Format);
             Chapters = analysis.Chapters.Select(c => ParseChapter(c)).ToList();
