@@ -1,10 +1,12 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using FFMpegCore.Builders.MetaData;
 
 namespace FFMpegCore
 {
     public class MediaAnalysis : IMediaAnalysis
     {
+        [JsonConstructor]
         public MediaAnalysis()
         {
         }
