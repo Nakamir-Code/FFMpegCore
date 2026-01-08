@@ -31,7 +31,7 @@ namespace FFMpegCore
                 FormatLongName = analysisFormat.FormatLongName,
                 StreamCount = analysisFormat.NbStreams,
                 ProbeScore = analysisFormat.ProbeScore,
-                BitRate = long.Parse(analysisFormat.BitRate ?? "0"),
+                BitRate = MediaAnalysisUtils.ParseLongInvariant(analysisFormat.BitRate ?? "0"),
                 Tags = analysisFormat.Tags.ToCaseInsensitive(),
             };
         }
@@ -157,7 +157,20 @@ namespace FFMpegCore
         {
             return dictionary?.ToDictionary(tag => tag.Key, tag => tag.Value, StringComparer.OrdinalIgnoreCase) ?? new Dictionary<string, string>();
         }
-        public static double DivideRatio((double, double) ratio) => ratio.Item1 / ratio.Item2;
+        public static double DivideRatio((double, double) ratio)
+        {
+            if (double.IsNaN(ratio.Item1) || double.IsNaN(ratio.Item2))
+            {
+                return double.NaN;
+            }
+
+            if (ratio.Item2 == 0)
+            {
+                return 0;
+            }
+
+            return ratio.Item1 / ratio.Item2;
+        }
 
         public static (int, int) ParseRatioInt(string input, char separator)
         {
@@ -167,7 +180,9 @@ namespace FFMpegCore
             }
 
             var ratio = input.Split(separator);
-            return (ParseIntInvariant(ratio[0]), ParseIntInvariant(ratio[1]));
+            var first = ratio.Length > 0 ? ParseIntInvariant(ratio[0]) : 0;
+            var second = ratio.Length > 1 ? ParseIntInvariant(ratio[1]) : 0;
+            return (first, second);
         }
 
         public static (double, double) ParseRatioDouble(string input, char separator)
@@ -181,14 +196,55 @@ namespace FFMpegCore
             return (ratio.Length > 0 ? ParseDoubleInvariant(ratio[0]) : 0, ratio.Length > 1 ? ParseDoubleInvariant(ratio[1]) : 0);
         }
 
-        public static double ParseDoubleInvariant(string line) =>
-            double.Parse(line, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture);
+        public static double ParseDoubleInvariant(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                return 0;
+            }
 
-        public static int ParseIntInvariant(string line) =>
-            int.Parse(line, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture);
+            if (line.Equals("NaN", StringComparison.OrdinalIgnoreCase))
+            {
+                return double.NaN;
+            }
 
-        public static long ParseLongInvariant(string line) =>
-            long.Parse(line, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture);
+            if (double.TryParse(line, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result))
+            {
+                return result;
+            }
+
+            return 0;
+        }
+
+        public static int ParseIntInvariant(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                return 0;
+            }
+
+            if (int.TryParse(line, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result))
+            {
+                return result;
+            }
+
+            return 0;
+        }
+
+        public static long ParseLongInvariant(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                return 0;
+            }
+
+            if (long.TryParse(line, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result))
+            {
+                return result;
+            }
+
+            return 0;
+        }
 
         public static TimeSpan ParseDuration(string duration)
         {
@@ -197,19 +253,27 @@ namespace FFMpegCore
                 var match = DurationRegex.Match(duration);
                 if (match.Success)
                 {
-                    // ffmpeg may provide < 3-digit number of milliseconds (omitting trailing zeros), which won't simply parse correctly
-                    // e.g. 00:12:02.11 -> 12 minutes 2 seconds and 110 milliseconds
-                    var millisecondsPart = match.Groups[4].Value;
-                    if (millisecondsPart.Length < 3)
+                    try
                     {
-                        millisecondsPart = millisecondsPart.PadRight(3, '0');
-                    }
+                        // ffmpeg may provide < 3-digit number of milliseconds (omitting trailing zeros), which won't simply parse correctly
+                        // e.g. 00:12:02.11 -> 12 minutes 2 seconds and 110 milliseconds
+                        var millisecondsPart = match.Groups[4].Value;
+                        if (millisecondsPart.Length < 3)
+                        {
+                            millisecondsPart = millisecondsPart.PadRight(3, '0');
+                        }
 
-                    var hours = int.Parse(match.Groups[1].Value);
-                    var minutes = int.Parse(match.Groups[2].Value);
-                    var seconds = int.Parse(match.Groups[3].Value);
-                    var milliseconds = int.Parse(millisecondsPart);
-                    return new TimeSpan(0, hours, minutes, seconds, milliseconds);
+                        if (!int.TryParse(match.Groups[1].Value, out var hours)) hours = 0;
+                        if (!int.TryParse(match.Groups[2].Value, out var minutes)) minutes = 0;
+                        if (!int.TryParse(match.Groups[3].Value, out var seconds)) seconds = 0;
+                        if (!int.TryParse(millisecondsPart, out var milliseconds)) milliseconds = 0;
+
+                        return new TimeSpan(0, hours, minutes, seconds, milliseconds);
+                    }
+                    catch
+                    {
+                        return TimeSpan.Zero;
+                    }
                 }
                 else
                 {
@@ -228,12 +292,20 @@ namespace FFMpegCore
 
             if (displayMatrixSideData?.TryGetValue("rotation", out var rawRotation) ?? false)
             {
-                return (int)float.Parse(rawRotation.ToString());
+                var rotationString = rawRotation.ToString();
+                if (float.TryParse(rotationString, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var rotationValue))
+                {
+                    return (int)rotationValue;
+                }
             }
-            else
+
+            var rotateTag = fFProbeStream.GetRotate() ?? "0";
+            if (float.TryParse(rotateTag, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var tagRotationValue))
             {
-                return (int)float.Parse(fFProbeStream.GetRotate() ?? "0");
+                return (int)tagRotationValue;
             }
+
+            return 0;
         }
 
         public static Dictionary<string, bool>? FormatDisposition(Dictionary<string, int>? disposition)
