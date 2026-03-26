@@ -32,6 +32,7 @@ namespace FFMpegCore
                 StreamCount = analysisFormat.NbStreams,
                 ProbeScore = analysisFormat.ProbeScore,
                 BitRate = MediaAnalysisUtils.ParseLongInvariant(analysisFormat.BitRate ?? "0"),
+                SizeInBytes = long.TryParse(analysisFormat.Size, out long size) ? size : null,
                 Tags = analysisFormat.Tags.ToCaseInsensitive(),
             };
         }
